@@ -5,9 +5,12 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
+import androidx.room.Room
 import br.senac.noteapp.R
 import br.senac.noteapp.databinding.ActivityListNotesBinding
 import br.senac.noteapp.databinding.CardNoteBinding
+import br.senac.noteapp.db.AppDataBase
+import br.senac.noteapp.model.Note
 import br.senac.noteapp.model.Notes
 
 class ListNotesActivity : AppCompatActivity() {
@@ -50,10 +53,25 @@ class ListNotesActivity : AppCompatActivity() {
     }
 
     fun refreshNotes(){
+        Thread {
+            val db = Room.databaseBuilder(this, AppDataBase::class.java,"Appdb").build()
+
+            val noteList = db.noteDao().list()
+
+            runOnUiThread {
+                updateUI(noteList)
+            }
+
+
+        }.start()
+    }
+
+
+    fun updateUI(notes: List<Note>){
 
         binding.notesContainer.removeAllViews()
 
-        Notes.noteList.forEach{
+        notes.forEach{
             val cardBinding = CardNoteBinding.inflate(layoutInflater)
 
             cardBinding.txtTitle.text = it.title
@@ -63,6 +81,22 @@ class ListNotesActivity : AppCompatActivity() {
             binding.notesContainer.addView(cardBinding.root)
         }
     }
+
+
+//    fun refreshNotes(){
+//
+//        binding.notesContainer.removeAllViews()
+//
+//        Notes.noteList.forEach{
+//            val cardBinding = CardNoteBinding.inflate(layoutInflater)
+//
+//            cardBinding.txtTitle.text = it.title
+//            cardBinding.txtDesc.text = it.desc
+//            cardBinding.creator.text = it.user
+//
+//            binding.notesContainer.addView(cardBinding.root)
+//        }
+//    }
 
 
 }

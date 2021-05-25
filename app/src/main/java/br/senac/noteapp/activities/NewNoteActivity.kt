@@ -4,9 +4,12 @@ import android.content.Context
 import android.os.Bundle
 import android.provider.ContactsContract
 import androidx.appcompat.app.AppCompatActivity
+import androidx.room.Room
 import br.senac.noteapp.databinding.ActivityNewNoteBinding
+import br.senac.noteapp.db.AppDataBase
 import br.senac.noteapp.model.Note
 import br.senac.noteapp.model.Notes
+import kotlin.concurrent.thread
 
 class NewNoteActivity : AppCompatActivity() {
     lateinit var binding: ActivityNewNoteBinding
@@ -26,10 +29,23 @@ class NewNoteActivity : AppCompatActivity() {
                 user = user
             )
 
-            Notes.noteList.add(note)
-            finish()
+            //Roda em Paralelo com o codigo
+            Thread {
+                saveNote(note)
+                finish()
+            }.start()
+
+            //Notes.noteList.add(note)
+
         }
 
+    }
+
+    //Salva no banco de dados
+    fun saveNote (note: Note) {
+        val db = Room.databaseBuilder(this, AppDataBase::class.java,"Appdb").build()
+
+        db.noteDao().insert(note)
     }
 
 }
